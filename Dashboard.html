@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Car Park Availability</title>
+    <style>
+        body {
+            display: flex;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+
+        .left-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.5); /* Optional for styling */
+        }
+
+        .availability {
+            font-size: 24px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .availability h1 {
+            font-size: 30px;
+            margin-bottom: 20px;
+        }
+
+        .right-background {
+            flex: 2; /* Takes up 2/3 of the screen */
+            background-image: url('carpark.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: right;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div class="left-content">
+        <div class="availability">
+            <h1>Carpark Information</h1>
+            <p>Available Carpark Lot: <span id="available-lots">Fetching...</span></p>
+            <p>Lot 1 Status: <span id="lot-1-status">Fetching...</span></p>
+            <p>Lot 2 Status: <span id="lot-2-status">Fetching...</span></p>
+            <p>Cars in Carpark: <span id="cars-in-carpark">Fetching...</span></p>
+        </div>
+    </div>
+
+    <div class="right-background"></div>
+
+    <script>
+        // Replace 'YOUR_API_KEY' and 'YOUR_THING_ID' with your actual API Key and Thing ID
+        async function fetchCarParkData() {
+            const apiKey = 'evC691KHvc44VgSFlE5zpXETi8IuuH0b'; // Replace with your actual API key
+            const thingId = '40d98967-da9b-43b5-9a6a-1a3cd04c68bc'; // Replace with your Thing's ID
+            const url = `https://api2.arduino.cc/iot/v2/things/${thingId}/properties`;
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+
+                // Assuming the properties are named in Arduino IoT Cloud as follows:
+                document.getElementById('available-lots').innerText = data.availableLots; // Available parking lots
+                document.getElementById('lot-1-status').innerText = data.lot1Status ? 'Available' : 'Occupied'; // Lot 1 Status
+                document.getElementById('lot-2-status').innerText = data.lot2Status ? 'Available' : 'Occupied'; // Lot 2 Status
+                document.getElementById('cars-in-carpark').innerText = data.carsInCarpark; // Cars in Carpark
+            } else {
+                console.error('Error fetching data:', response.statusText);
+            }
+        }
+
+        // Fetch data every minute
+        fetchCarParkData();
+        setInterval(fetchCarParkData, 60000); // Update every minute
+    </script>
+</body>
+</html>
